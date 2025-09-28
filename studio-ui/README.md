@@ -77,17 +77,7 @@ Necesito un mini-Tinkercad hecho en React, enfocado en personalización rápida 
 
 ✅ Entregable: colocar un cubo o esfera, moverlo y escalarlo dentro de la cama.
 
-### Fase 3 — Validación de límites (Semana 3)
-
-🔹 Objetivo: que el editor entienda los límites físicos.
-
-- Calcular Box3 de cada objeto.
-- Mostrar medidas actuales en mm en un panel lateral.
-- Detectar si el objeto excede los límites de impresión → mostrar alerta visual (cambiar color, tooltip, mensaje).
-
-✅ Entregable: si un cubo se sale de la cama, aparece alerta roja.
-
-### Fase 4 — Personalización (Semana 4)
+### Fase 3 — Personalización (Semana 4)
 
 🔹 Objetivo: permitir modificaciones útiles y divertidas.
 
@@ -96,6 +86,16 @@ Necesito un mini-Tinkercad hecho en React, enfocado en personalización rápida 
 - Panel lateral con controles: posición, escala, rotación (inputs numéricos).
 
 ✅ Entregable: escribir tu nombre y verlo en la cama, coloreado.
+
+### Fase 4 — Validación de límites (Semana 3)
+
+🔹 Objetivo: que el editor entienda los límites físicos.
+
+- Calcular Box3 de cada objeto.
+- Mostrar medidas actuales en mm en un panel lateral.
+- Detectar si el objeto excede los límites de impresión → mostrar alerta visual (cambiar color, tooltip, mensaje).
+
+✅ Entregable: si un cubo se sale de la cama, aparece alerta roja.
 
 ### Fase 5 — Exportación (Semana 5)
 
