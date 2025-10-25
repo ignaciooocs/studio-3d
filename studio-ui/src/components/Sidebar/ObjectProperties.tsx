@@ -1,11 +1,14 @@
-import { Box, TextField, Typography, Stack, Divider, ToggleButtonGroup, ToggleButton } from '@mui/material'
+import { Box, TextField, Typography, Stack, Divider, ToggleButtonGroup, ToggleButton, Chip } from '@mui/material'
 import OpenWithIcon from '@mui/icons-material/OpenWith'
 import Rotate90DegreesCcwIcon from '@mui/icons-material/Rotate90DegreesCcw'
 import ZoomOutMapIcon from '@mui/icons-material/ZoomOutMap'
+import StraightenIcon from '@mui/icons-material/Straighten'
 import { useStore } from '../../store/useStore'
+import { useObjectDimensions } from '../../hooks/useObjectDimensions'
 
 const rad2deg = (r: number) => (r * 180) / Math.PI
 const deg2rad = (d: number) => (d * Math.PI) / 180
+
 
 // Inputs numéricos para posición, rotación, escala (Fase 2/3/4)
 export default function ObjectProperties() {
@@ -14,6 +17,9 @@ export default function ObjectProperties() {
   const selectedId = useStore((s) => s.selectedId)
   const selected = useStore((s) => s.objects.find((o) => o.id === s.selectedId) || null)
   const updateObject = useStore((s) => s.updateObject)
+  
+  // Usar el hook para calcular dimensiones
+  const dimensions = useObjectDimensions(selectedId)
 
   const onPosChange = (axis: 0 | 1 | 2) => (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!selected) return
@@ -42,6 +48,25 @@ export default function ObjectProperties() {
     updateObject(selected.id, { scale: next })
   }
 
+  const onTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selected) return
+    updateObject(selected.id, { text: e.target.value })
+  }
+
+  const onFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selected) return
+    const v = parseFloat(e.target.value)
+    if (Number.isNaN(v)) return
+    updateObject(selected.id, { fontSize: v })
+  }
+
+  const onThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selected) return
+    const v = parseFloat(e.target.value)
+    if (Number.isNaN(v)) return
+    updateObject(selected.id, { thickness: v })
+  }
+
   return (
     <Stack spacing={2}>
       <Typography variant="subtitle2" color="text.secondary">Herramientas</Typography>
@@ -57,6 +82,50 @@ export default function ObjectProperties() {
         <ToggleButton value="scale" aria-label="Escalar"><ZoomOutMapIcon fontSize="small" />&nbsp;Escalar</ToggleButton>
       </ToggleButtonGroup>
 
+      {dimensions && (
+        <>
+          <Typography variant="subtitle2" color="text.secondary">Dimensiones</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <StraightenIcon fontSize="small" color="primary" />
+              <Typography variant="body2" color="text.secondary">Ancho:</Typography>
+              <Chip 
+                label={`${dimensions.width} mm`} 
+                size="small" 
+                color="primary" 
+                variant="outlined"
+              />
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <StraightenIcon fontSize="small" color="primary" />
+              <Typography variant="body2" color="text.secondary">Alto:</Typography>
+              <Chip 
+                label={`${dimensions.height} mm`} 
+                size="small" 
+                color="primary" 
+                variant="outlined"
+              />
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <StraightenIcon fontSize="small" color="primary" />
+              <Typography variant="body2" color="text.secondary">Profundidad:</Typography>
+              <Chip 
+                label={`${dimensions.depth} mm`} 
+                size="small" 
+                color="primary" 
+                variant="outlined"
+              />
+            </Box>
+            <Box sx={{ mt: 1, p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                Dimensiones aproximadas para impresión 3D
+              </Typography>
+            </Box>
+          </Box>
+          <Divider sx={{ my: 2 }} />
+        </>
+      )}
+
       <Typography variant="subtitle2" color="text.secondary">Transformaciones</Typography>
       <Divider />
 
@@ -64,6 +133,19 @@ export default function ObjectProperties() {
         <Typography variant="body2" color="text.secondary">Selecciona un objeto para editar sus propiedades.</Typography>
       ) : (
         <>
+          {selected.type === 'text' && (
+            <Box>
+              <Typography variant="body2" gutterBottom>Texto 3D</Typography>
+              <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                <TextField size="small" label="Contenido" fullWidth value={selected.text ?? ''} onChange={onTextChange} />
+              </Stack>
+              <Stack direction="row" spacing={1}>
+                <TextField size="small" label="Tamaño (mm)" type="number" inputProps={{ step: 1, min: 1 }} fullWidth value={selected.fontSize ?? 16} onChange={onFontSizeChange} />
+                <TextField size="small" label="Grosor (mm)" type="number" inputProps={{ step: 1, min: 1 }} fullWidth value={selected.thickness ?? 4} onChange={onThicknessChange} />
+              </Stack>
+            </Box>
+          )}
+
           <Box>
             <Typography variant="body2" gutterBottom>Posición (mm)</Typography>
             <Stack direction="row" spacing={1}>

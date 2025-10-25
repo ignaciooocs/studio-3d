@@ -12,6 +12,16 @@ export interface SceneObject {
   rotation: Vec3 // Rotación en radianes [x,y,z]
   scale: Vec3 // Escala por eje [x,y,z] (1 = tamaño original)
   color?: string // Color opcional del material del objeto
+  // Texto 3D (solo cuando type === 'text')
+  text?: string // Contenido del texto
+  fontSize?: number // Tamaño del texto en mm
+  thickness?: number // Grosor del texto en mm (height de Text3D)
+  // Modelo externo (solo cuando type === 'custom')
+  src?: string // URL del recurso (puede ser blob:ObjectURL)
+  srcType?: 'gltf' // Tipo de modelo para decidir loader (por ahora: gltf)
+  filesMap?: Record<string, string> // Mapeo nombre->ObjectURL para buffers/texturas referenciados
+  // Dimensiones calculadas (solo cuando type === 'custom')
+  dimensions?: { width: number; height: number; depth: number } // Dimensiones reales en mm
   // espacio para futuras propiedades: material, metadata, etc.
 }
 

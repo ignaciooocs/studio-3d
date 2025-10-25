@@ -1,9 +1,11 @@
-import { Edges } from '@react-three/drei'
+import { Edges, Text3D, Center } from '@react-three/drei'
 import { useStore } from '../../store/useStore'
+import CustomGLTF from './CustomGLTF'
 
 const DEFAULT_COLOR = '#7dd3fc' // Color por defecto para objetos no seleccionados
 const SELECTED_COLOR = '#60a5fa' // Color para objeto seleccionado
 const CUBE_DIMS: [number, number, number] = [20, 20, 20] // Tamaño base del cubo (mm)
+const FONT_URL = 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json' // Fuente JSON para Text3D
 
 // Iterará y dibujará los objetos desde el store global (Fase 2)
 export default function SceneObjects() {
@@ -45,6 +47,25 @@ export default function SceneObjects() {
               <meshStandardMaterial color={color} roughness={0.6} metalness={0.1} />
               {isSelected && <Edges color="#111827" />}{/* Resalta bordes si está seleccionado */}
             </mesh>
+          )
+        }
+        if (o.type === 'text') {
+          return (
+            <group key={o.id} {...common}>
+              <Center>
+                <Text3D font={FONT_URL} size={o.fontSize ?? 16} height={o.thickness ?? 4}>
+                  {o.text ?? 'Texto'}
+                  <meshStandardMaterial color={color} roughness={0.6} metalness={0.1} />
+                </Text3D>
+              </Center>s
+            </group>
+          )
+        }
+        if (o.type === 'custom' && o.src && o.srcType === 'gltf') {
+          return (
+            <group key={o.id} {...common}>
+              <CustomGLTF src={o.src} objectId={o.id} />
+            </group>
           )
         }
         // placeholder para otros tipos
