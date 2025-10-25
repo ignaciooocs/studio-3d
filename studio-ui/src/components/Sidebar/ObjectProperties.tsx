@@ -144,7 +144,7 @@ export default function ObjectProperties() {
                 variant="outlined"
               />
             </Box>
-            <Box sx={{ mt: 1, p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
+            <Box sx={{ mt: 1, p: 1, borderRadius: 1 }}>
               <Typography variant="caption" color="text.secondary">
                 Dimensiones aproximadas para impresión 3D
               </Typography>
@@ -162,7 +162,7 @@ export default function ObjectProperties() {
       ) : (
         <>
           {selected.type === 'text' && (
-            <Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <Typography variant="body2" gutterBottom>Texto 3D</Typography>
               <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
                 <TextField size="small" label="Contenido" fullWidth value={selected.text ?? ''} onChange={onTextChange} />

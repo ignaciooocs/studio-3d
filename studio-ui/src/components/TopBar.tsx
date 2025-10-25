@@ -7,6 +7,8 @@ import { useStore } from '../store/useStore'
 import { useEditorContext } from '../context/EditorContext'
 import { UndoRedoControls } from './ui/UndoRedoControlsMUI'
 import { ThemeToggle } from './ThemeToggle'
+import { ExportDialog } from './ExportDialog'
+import { useExport } from '../hooks/useExport'
 import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 
@@ -16,6 +18,9 @@ export default function TopBar() {
   const { commands } = useEditorContext()
   const { undo, redo, state: commandState } = commands
   const theme = useTheme()
+  
+  // Export functionality
+  const { exportScene, isExporting } = useExport()
 
   // Preferences state from store
   const showBuildVolume = useStore((s) => s.showBuildVolume)
@@ -32,6 +37,7 @@ export default function TopBar() {
   const setUseAutoColors = useStore((s) => s.setUseAutoColors)
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const open = Boolean(anchorEl)
 
   return (
@@ -60,10 +66,25 @@ export default function TopBar() {
         </Button>
         <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
           <Button variant="outlined" startIcon={<SaveRoundedIcon />}>Guardar</Button>
-          <Button variant="contained" startIcon={<IosShareRoundedIcon />}>Exportar STL</Button>
+          <Button 
+            variant="contained" 
+            startIcon={<IosShareRoundedIcon />}
+            onClick={() => setExportDialogOpen(true)}
+            disabled={isExporting}
+          >
+            {isExporting ? 'Exportando...' : 'Exportar'}
+          </Button>
           <Button color="inherit" startIcon={<RestartAltRoundedIcon />} onClick={() => reset()}>Reset</Button>
         </Box>
       </Toolbar>
+
+      {/* Export Dialog */}
+      <ExportDialog
+        open={exportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+        onExport={exportScene}
+        loading={isExporting}
+      />
 
       <Popover
         open={open}
