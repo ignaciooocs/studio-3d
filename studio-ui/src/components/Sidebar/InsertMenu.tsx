@@ -4,6 +4,7 @@ import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 import TextFieldsOutlinedIcon from '@mui/icons-material/TextFieldsOutlined'
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined'
 import { useStore } from '../../store/useStore'
+import { useEditorContextCommands } from '../../context/EditorContext'
 import { useRef } from 'react'
 
 function newId() {
@@ -15,7 +16,7 @@ function newId() {
 
 // Botones para agregar cubo, esfera, texto y cargar modelo (GLTF/GLB)
 export default function InsertMenu() {
-  const addObject = useStore((s) => s.addObject)
+  const { addObject } = useEditorContextCommands()
   const setSelected = useStore((s) => s.setSelected)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 

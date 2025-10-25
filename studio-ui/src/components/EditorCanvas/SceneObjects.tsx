@@ -57,7 +57,7 @@ export default function SceneObjects() {
                   {o.text ?? 'Texto'}
                   <meshStandardMaterial color={color} roughness={0.6} metalness={0.1} />
                 </Text3D>
-              </Center>s
+              </Center>
             </group>
           )
         }

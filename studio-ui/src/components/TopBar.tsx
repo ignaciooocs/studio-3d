@@ -4,11 +4,15 @@ import IosShareRoundedIcon from '@mui/icons-material/IosShareRounded'
 import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import { useStore } from '../store/useStore'
+import { useEditorContext } from '../context/EditorContext'
+import { UndoRedoControls } from './ui/UndoRedoControlsMUI'
 import { useState } from 'react'
 
 // Top bar with global actions. Preferences are shown in a popover anchored to the button.
 export default function TopBar() {
   const reset = useStore((s) => s.reset)
+  const { commands } = useEditorContext()
+  const { undo, redo, state: commandState } = commands
 
   // Preferences state from store
   const showBuildVolume = useStore((s) => s.showBuildVolume)
@@ -30,7 +34,18 @@ export default function TopBar() {
       <Toolbar>
         <Typography variant="h6" component="div">Studio 3D</Typography>
         <Box sx={{ flexGrow: 1 }} />
-        <Button startIcon={<SettingsOutlinedIcon />} onClick={(e) => setAnchorEl(e.currentTarget)}>Preferencias</Button>
+        
+        {/* Undo/Redo Controls */}
+        <UndoRedoControls 
+          state={commandState} 
+          onUndo={undo} 
+          onRedo={redo} 
+          compact 
+        />
+        
+        <Button startIcon={<SettingsOutlinedIcon />} onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ ml: 2 }}>
+          Preferencias
+        </Button>
         <Box sx={{ display: 'flex', gap: 1, ml: 2 }}>
           <Button variant="outlined" startIcon={<SaveRoundedIcon />}>Guardar</Button>
           <Button variant="contained" startIcon={<IosShareRoundedIcon />}>Exportar STL</Button>

@@ -1,6 +1,31 @@
 ## 📝 Contexto del Proyecto
 
-Quiero desarrollar una aplicación web en React donde los usuarios puedan personalizar modelos 3D para luego exportarlos directamente en formato STL, listos para impresión 3D.
+Quiero desarrollar una aplicación web en React donde los usuarios puedan persona### Fase 6 — Persistencia mínima (Semana 6)
+
+🔹 Objetivo: guardar y recuperar proyectos.
+
+- Backend Express simple con endpoint /upload-stl.
+- Enviar STL al servidor (FormData).
+- Guardar archivo en uploads/ y registrar metadatos (JSON).
+- Pantalla de usuario → "Mis modelos" con lista de descargas.
+
+✅ Entregable: usuario guarda su modelo, lo ve en su lista y lo descarga cuando quiera.
+
+### Fase 7 — Sistema Undo/Redo (Semana 7)
+
+🔹 Objetivo: implementar un sistema robusto de deshacer/rehacer acciones.
+
+- Command Pattern para encapsular todas las operaciones del editor.
+- Historial de comandos con navegación hacia adelante y atrás.
+- Shortcuts de teclado (Ctrl+Z, Ctrl+Y / Ctrl+Shift+Z).
+- Indicadores visuales en la UI (botones habilitados/deshabilitados).
+- Límite de historial configurable para optimizar memoria.
+- Merge inteligente de comandos similares consecutivos.
+- Integración completa con todas las operaciones del editor.
+
+✅ Entregable: usuario puede deshacer/rehacer cualquier acción (agregar, mover, cambiar color, etc.) con teclado o botones.
+
+### 🔮 Futuro post-MVP (cuando el MVP ya funcione) 3D para luego exportarlos directamente en formato STL, listos para impresión 3D.
 
 ## 🎯 Objetivo Principal
 
