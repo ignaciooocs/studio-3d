@@ -50,14 +50,15 @@ export default function InsertMenu() {
 
   const addText = () => {
     const id = newId()
+    const textContent = 'Hola'
     addObject({
       id,
-      name: 'Texto',
+      // No establecer un nombre fijo, dejar que se genere dinámicamente desde el contenido
       type: 'text',
       position: [0, 10, 0],
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
-      text: 'Hola',
+      text: textContent,
       fontSize: 16,
       thickness: 4,
       color: '#9ca3af',

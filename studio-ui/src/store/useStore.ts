@@ -32,6 +32,7 @@ interface AppState {
   transformMode: TransformMode // Modo actual de TransformControls: mover/rotar/escalar
   bedColor: string // Color del plano de la cama de impresión
   canvasBgColor: string // Color de fondo del Canvas (escena)
+  useAutoColors: boolean // Usar colores automáticos del tema (true) o colores personalizados (false)
   showGridMinor: boolean // Mostrar líneas finas del grid (cada 5 mm)
   showGridMajor: boolean // Mostrar líneas gruesas/secciones del grid (cada 10 mm)
 
@@ -45,6 +46,7 @@ interface AppState {
   setTransformMode: (m: TransformMode) => void // Cambia el modo de edición (translate/rotate/scale)
   setBedColor: (c: string) => void // Cambia el color de la cama
   setCanvasBgColor: (c: string) => void // Cambia el color de fondo del Canvas
+  setUseAutoColors: (v: boolean) => void // Activa/desactiva colores automáticos del tema
   setShowGridMinor: (v: boolean) => void // Muestra/oculta el grid fino (5 mm)
   setShowGridMajor: (v: boolean) => void // Muestra/oculta el grid grueso (10 mm)
 }
@@ -57,6 +59,7 @@ export const useStore = create<AppState>((set) => ({
   transformMode: 'translate', // modo inicial: mover
   bedColor: '#f8fafc', // color claro por defecto para la cama
   canvasBgColor: '#ffffff', // fondo blanco por defecto
+  useAutoColors: true, // usar colores automáticos del tema por defecto
   showGridMinor: true, // mostrar líneas finas (5 mm)
   showGridMajor: true, // mostrar líneas gruesas (10 mm)
 
@@ -74,6 +77,7 @@ export const useStore = create<AppState>((set) => ({
   setTransformMode: (m) => set({ transformMode: m }), // Cambia el modo de edición
   setBedColor: (c) => set({ bedColor: c }), // Cambia el color de la cama
   setCanvasBgColor: (c) => set({ canvasBgColor: c }), // Cambia el color de fondo del Canvas
+  setUseAutoColors: (v) => set({ useAutoColors: v }), // Activa/desactiva colores automáticos
   setShowGridMinor: (v) => set({ showGridMinor: v }), // Muestra/oculta el grid fino (5 mm)
   setShowGridMajor: (v) => set({ showGridMajor: v }), // Muestra/oculta el grid grueso (10 mm)
 }))

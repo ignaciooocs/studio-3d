@@ -3,12 +3,20 @@ import { Box, Paper } from '@mui/material'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { useStore } from '../../store/useStore'
+import { useThemeContext } from '../../context/ThemeProvider'
 import SceneWrapper from './SceneWrapper'
 
 // Implemented R3F Canvas with camera, lights, OrbitControls, PrintBed and BuildVolume
 export default function EditorCanvas() {
   const setSelected = useStore((s) => s.setSelected)
-  const canvasBgColor = useStore((s) => s.canvasBgColor)
+  const useAutoColors = useStore((s) => s.useAutoColors)
+  const manualCanvasBgColor = useStore((s) => s.canvasBgColor)
+  const { mode } = useThemeContext()
+  
+  // Sistema híbrido de colores: automático del tema o manual
+  const canvasBgColor = useAutoColors 
+    ? (mode === 'light' ? '#f5f5f5' : '#2a2a2a')
+    : manualCanvasBgColor
 
   return (
     <Box sx={{ flex: 1, p: 2, overflow: 'hidden' }}>

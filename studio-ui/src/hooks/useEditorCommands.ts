@@ -320,6 +320,34 @@ export function useEditorCommands() {
     commandManager.executeCommand(command);
   };
 
+  /**
+   * Update object properties with command
+   */
+  const updateObjectProperties = (id: string, updates: Partial<SceneObject>, description?: string) => {
+    const sceneObj = store.objects.find(obj => obj.id === id);
+    if (!sceneObj) return;
+
+    // Create old values for undo
+    const oldValues: Partial<SceneObject> = {};
+    for (const key in updates) {
+      if (key in sceneObj) {
+        oldValues[key as keyof SceneObject] = sceneObj[key as keyof SceneObject] as any;
+      }
+    }
+
+    const command = new EditorCommand(
+      description || `Update ${sceneObj.type || 'Object'} properties`,
+      () => {
+        store.updateObject(id, updates);
+      },
+      () => {
+        store.updateObject(id, oldValues);
+      }
+    );
+    
+    commandManager.executeCommand(command);
+  };
+
   return {
     // Command operations
     addObject,
@@ -330,6 +358,7 @@ export function useEditorCommands() {
     moveObject,
     rotateObject,
     scaleObject,
+    updateObjectProperties,
     clearScene,
     
     // Command manager access

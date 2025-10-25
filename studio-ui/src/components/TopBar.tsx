@@ -3,9 +3,11 @@ import SaveRoundedIcon from '@mui/icons-material/SaveRounded'
 import IosShareRoundedIcon from '@mui/icons-material/IosShareRounded'
 import RestartAltRoundedIcon from '@mui/icons-material/RestartAltRounded'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
-import { useStore } from '../store/useStore'
+import { useStore } from '../store/useStore' 
 import { useEditorContext } from '../context/EditorContext'
 import { UndoRedoControls } from './ui/UndoRedoControlsMUI'
+import { ThemeToggle } from './ThemeToggle'
+import { useTheme } from '@mui/material/styles'
 import { useState } from 'react'
 
 // Top bar with global actions. Preferences are shown in a popover anchored to the button.
@@ -13,6 +15,7 @@ export default function TopBar() {
   const reset = useStore((s) => s.reset)
   const { commands } = useEditorContext()
   const { undo, redo, state: commandState } = commands
+  const theme = useTheme()
 
   // Preferences state from store
   const showBuildVolume = useStore((s) => s.showBuildVolume)
@@ -25,12 +28,18 @@ export default function TopBar() {
   const showGridMajor = useStore((s) => s.showGridMajor)
   const setShowGridMinor = useStore((s) => s.setShowGridMinor)
   const setShowGridMajor = useStore((s) => s.setShowGridMajor)
+  const useAutoColors = useStore((s) => s.useAutoColors)
+  const setUseAutoColors = useStore((s) => s.setUseAutoColors)
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = Boolean(anchorEl)
 
   return (
-    <AppBar position="sticky" color="default" elevation={1} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+    <AppBar position="sticky" color="default" elevation={1} sx={{ 
+      borderBottom: 1, 
+      borderColor: 'divider', 
+      bgcolor: theme.customColors.surface.main
+    }}>
       <Toolbar>
         <Typography variant="h6" component="div">Studio 3D</Typography>
         <Box sx={{ flexGrow: 1 }} />
@@ -42,6 +51,9 @@ export default function TopBar() {
           onRedo={redo} 
           compact 
         />
+        
+        {/* Theme Toggle */}
+        <ThemeToggle />
         
         <Button startIcon={<SettingsOutlinedIcon />} onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ ml: 2 }}>
           Preferencias
@@ -79,16 +91,22 @@ export default function TopBar() {
           />
 
           <Typography variant="subtitle2">Colores</Typography>
-          <Stack direction="row" spacing={3} alignItems="center">
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="body2">Fondo</Typography>
-              <input type="color" aria-label="Color de fondo" value={canvasBgColor} onChange={(e) => setCanvasBgColor(e.target.value)} />
+          <FormControlLabel
+            control={<Switch checked={useAutoColors} onChange={(e) => setUseAutoColors(e.target.checked)} />}
+            label="Usar colores automáticos del tema"
+          />
+          {!useAutoColors && (
+            <Stack direction="row" spacing={3} alignItems="center">
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography variant="body2">Fondo</Typography>
+                <input type="color" aria-label="Color de fondo" value={canvasBgColor} onChange={(e) => setCanvasBgColor(e.target.value)} />
+              </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography variant="body2">Cama</Typography>
+                <input type="color" aria-label="Color de la cama" value={bedColor} onChange={(e) => setBedColor(e.target.value)} />
+              </Stack>
             </Stack>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="body2">Cama</Typography>
-              <input type="color" aria-label="Color de la cama" value={bedColor} onChange={(e) => setBedColor(e.target.value)} />
-            </Stack>
-          </Stack>
+          )}
         </Stack>
       </Popover>
     </AppBar>

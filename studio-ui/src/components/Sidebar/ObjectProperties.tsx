@@ -5,6 +5,7 @@ import ZoomOutMapIcon from '@mui/icons-material/ZoomOutMap'
 import StraightenIcon from '@mui/icons-material/Straighten'
 import { useStore } from '../../store/useStore'
 import { useObjectDimensions } from '../../hooks/useObjectDimensions'
+import { useEditorContextCommands } from '../../context/EditorContext'
 
 const rad2deg = (r: number) => (r * 180) / Math.PI
 const deg2rad = (d: number) => (d * Math.PI) / 180
@@ -16,7 +17,7 @@ export default function ObjectProperties() {
   const setMode = useStore((s) => s.setTransformMode)
   const selectedId = useStore((s) => s.selectedId)
   const selected = useStore((s) => s.objects.find((o) => o.id === s.selectedId) || null)
-  const updateObject = useStore((s) => s.updateObject)
+  const commands = useEditorContextCommands()
   
   // Usar el hook para calcular dimensiones
   const dimensions = useObjectDimensions(selectedId)
@@ -27,7 +28,8 @@ export default function ObjectProperties() {
     if (Number.isNaN(value)) return
     const next = [...selected.position] as typeof selected.position
     next[axis] = value
-    updateObject(selected.id, { position: next })
+    // Usar comando para que se registre en el historial de undo/redo
+    commands.moveObject(selected.id, next)
   }
 
   const onRotChange = (axis: 0 | 1 | 2) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,7 +38,8 @@ export default function ObjectProperties() {
     if (Number.isNaN(valueDeg)) return
     const next = [...selected.rotation] as typeof selected.rotation
     next[axis] = deg2rad(valueDeg)
-    updateObject(selected.id, { rotation: next })
+    // Usar comando para que se registre en el historial de undo/redo
+    commands.rotateObject(selected.id, next)
   }
 
   const onScaleChange = (axis: 0 | 1 | 2) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,30 +48,55 @@ export default function ObjectProperties() {
     if (Number.isNaN(value)) return
     const next = [...selected.scale] as typeof selected.scale
     next[axis] = value
-    updateObject(selected.id, { scale: next })
+    // Usar comando para que se registre en el historial de undo/redo
+    commands.scaleObject(selected.id, next)
   }
 
   const onTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!selected) return
-    updateObject(selected.id, { text: e.target.value })
+    // Usar comando para que se registre en el historial de undo/redo
+    commands.updateObjectProperties(selected.id, { text: e.target.value }, `Change text content`)
+  }
+
+  const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selected) return
+    // Usar comando para que se registre en el historial de undo/redo
+    commands.updateObjectProperties(selected.id, { name: e.target.value }, `Change object name`)
   }
 
   const onFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!selected) return
     const v = parseFloat(e.target.value)
     if (Number.isNaN(v)) return
-    updateObject(selected.id, { fontSize: v })
+    // Usar comando para que se registre en el historial de undo/redo
+    commands.updateObjectProperties(selected.id, { fontSize: v }, `Change font size`)
   }
 
   const onThicknessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!selected) return
     const v = parseFloat(e.target.value)
     if (Number.isNaN(v)) return
-    updateObject(selected.id, { thickness: v })
+    // Usar comando para que se registre en el historial de undo/redo
+    commands.updateObjectProperties(selected.id, { thickness: v }, `Change text thickness`)
   }
 
   return (
     <Stack spacing={2}>
+       {/* Campo para nombre personalizado */}
+      {selected && selectedId && (
+        <Box>
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom>Identificación</Typography>
+          <TextField 
+            size="small" 
+            label="Nombre personalizado" 
+            fullWidth 
+            value={selected.name ?? ''} 
+            onChange={onNameChange}
+            placeholder={`${selected.type.charAt(0).toUpperCase() + selected.type.slice(1)}${selected.type === 'text' && selected.text ? ` "${selected.text}"` : ''}`}
+            helperText="Deja vacío para usar el nombre automático"
+          />
+        </Box>
+      )}
       <Typography variant="subtitle2" color="text.secondary">Herramientas</Typography>
       <ToggleButtonGroup
         color="primary"
@@ -149,25 +177,25 @@ export default function ObjectProperties() {
           <Box>
             <Typography variant="body2" gutterBottom>Posición (mm)</Typography>
             <Stack direction="row" spacing={1}>
-              <TextField size="small" label="X" type="number" inputProps={{ step: 1 }} fullWidth value={selected.position[0]} onChange={onPosChange(0)} />
-              <TextField size="small" label="Y" type="number" inputProps={{ step: 1 }} fullWidth value={selected.position[1]} onChange={onPosChange(1)} />
-              <TextField size="small" label="Z" type="number" inputProps={{ step: 1 }} fullWidth value={selected.position[2]} onChange={onPosChange(2)} />
+              <TextField color='error' size="small" label="X" type="number" inputProps={{ step: 1 }} fullWidth value={selected.position[0]} onChange={onPosChange(0)} />
+              <TextField color='success' size="small" label="Y" type="number" inputProps={{ step: 1 }} fullWidth value={selected.position[1]} onChange={onPosChange(1)} />
+              <TextField color='info' size="small" label="Z" type="number" inputProps={{ step: 1 }} fullWidth value={selected.position[2]} onChange={onPosChange(2)} />
             </Stack>
           </Box>
           <Box>
             <Typography variant="body2" gutterBottom>Rotación (°)</Typography>
             <Stack direction="row" spacing={1}>
-              <TextField size="small" label="X" type="number" inputProps={{ step: 1 }} fullWidth value={rad2deg(selected.rotation[0]).toFixed(2)} onChange={onRotChange(0)} />
-              <TextField size="small" label="Y" type="number" inputProps={{ step: 1 }} fullWidth value={rad2deg(selected.rotation[1]).toFixed(2)} onChange={onRotChange(1)} />
-              <TextField size="small" label="Z" type="number" inputProps={{ step: 1 }} fullWidth value={rad2deg(selected.rotation[2]).toFixed(2)} onChange={onRotChange(2)} />
+              <TextField color='error' size="small" label="X" type="number" inputProps={{ step: 1 }} fullWidth value={rad2deg(selected.rotation[0]).toFixed(2)} onChange={onRotChange(0)} />
+              <TextField color='success' size="small" label="Y" type="number" inputProps={{ step: 1 }} fullWidth value={rad2deg(selected.rotation[1]).toFixed(2)} onChange={onRotChange(1)} />
+              <TextField color='info' size="small" label="Z" type="number" inputProps={{ step: 1 }} fullWidth value={rad2deg(selected.rotation[2]).toFixed(2)} onChange={onRotChange(2)} />
             </Stack>
           </Box>
           <Box>
             <Typography variant="body2" gutterBottom>Escala</Typography>
             <Stack direction="row" spacing={1}>
-              <TextField size="small" label="X" type="number" inputProps={{ step: 0.1 }} fullWidth value={selected.scale[0]} onChange={onScaleChange(0)} />
-              <TextField size="small" label="Y" type="number" inputProps={{ step: 0.1 }} fullWidth value={selected.scale[1]} onChange={onScaleChange(1)} />
-              <TextField size="small" label="Z" type="number" inputProps={{ step: 0.1 }} fullWidth value={selected.scale[2]} onChange={onScaleChange(2)} />
+              <TextField color='error' size="small" label="X" type="number" inputProps={{ step: 0.1 }} fullWidth value={selected.scale[0]} onChange={onScaleChange(0)} />
+              <TextField color='success' size="small" label="Y" type="number" inputProps={{ step: 0.1 }} fullWidth value={selected.scale[1]} onChange={onScaleChange(1)} />
+              <TextField color='info' size="small" label="Z" type="number" inputProps={{ step: 0.1 }} fullWidth value={selected.scale[2]} onChange={onScaleChange(2)} />
             </Stack>
           </Box>
         </>

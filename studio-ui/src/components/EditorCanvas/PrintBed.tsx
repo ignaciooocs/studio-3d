@@ -1,14 +1,22 @@
 import { Line } from '@react-three/drei'
 import React from 'react'
 import { useStore } from '../../store/useStore'
+import { useThemeContext } from '../../context/ThemeProvider'
 
 // Renderizará la cama de impresión y límites físicos (Fase 1)
 export default function PrintBed() {
   const size = 220 // mm
   const half = size / 2
-  const bedColor = useStore((s) => s.bedColor)
+  const useAutoColors = useStore((s) => s.useAutoColors)
+  const manualBedColor = useStore((s) => s.bedColor)
   const showGridMinor = useStore((s) => s.showGridMinor)
   const showGridMajor = useStore((s) => s.showGridMajor)
+  const { mode } = useThemeContext()
+
+  // Sistema híbrido de colores: automático del tema o manual
+  const bedColor = useAutoColors 
+    ? (mode === 'light' ? '#e5e7eb' : '#b0b0b0ff')
+    : manualBedColor
 
   const minorStep = 5
   const majorStep = 10
