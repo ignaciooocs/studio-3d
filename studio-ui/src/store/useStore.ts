@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import type { PrinterSpec } from '../core/printers/types'
+import { DEFAULT_PRINTER_ID, PRINTERS, getPrinterById } from '../core/printers/presets'
 
 export type Vec3 = [number, number, number]
 export type SceneObjectType = 'cube' | 'sphere' | 'text' | 'custom'
@@ -36,6 +38,11 @@ interface AppState {
   showGridMinor: boolean // Mostrar líneas finas del grid (cada 5 mm)
   showGridMajor: boolean // Mostrar líneas gruesas/secciones del grid (cada 10 mm)
 
+  // Impresora seleccionada
+  selectedPrinterId: string // ID del preset de impresora seleccionado
+  getSelectedPrinter: () => PrinterSpec // Devuelve el preset de impresora actual
+  setSelectedPrinterId: (id: string) => void // Cambia la impresora actual y persiste
+
   addObject: (obj: SceneObject) => void // Agrega un objeto a la escena
   updateObject: (id: string, patch: Partial<SceneObject>) => void // Actualiza propiedades de un objeto por ID (patch)
   removeObject: (id: string) => void // Elimina un objeto por ID
@@ -51,7 +58,15 @@ interface AppState {
   setShowGridMajor: (v: boolean) => void // Muestra/oculta el grid grueso (10 mm)
 }
 
-export const useStore = create<AppState>((set) => ({
+const loadInitialPrinterId = () => {
+  try {
+    const saved = localStorage.getItem('studio:selectedPrinterId')
+    if (saved && getPrinterById(saved)) return saved
+  } catch { /* ignore localStorage unavailability */ }
+  return DEFAULT_PRINTER_ID
+}
+
+export const useStore = create<AppState>((set, get) => ({
   // Estado inicial
   objects: [], // sin objetos al iniciar
   selectedId: null, // nada seleccionado
@@ -62,6 +77,10 @@ export const useStore = create<AppState>((set) => ({
   useAutoColors: true, // usar colores automáticos del tema por defecto
   showGridMinor: true, // mostrar líneas finas (5 mm)
   showGridMajor: true, // mostrar líneas gruesas (10 mm)
+
+  // Impresora
+  selectedPrinterId: loadInitialPrinterId(),
+  getSelectedPrinter: () => getPrinterById(get().selectedPrinterId) ?? PRINTERS[0],
 
   // Acciones
   addObject: (obj) => set((s) => ({ objects: [...s.objects, obj] })), // Agrega un objeto a la escena
@@ -80,4 +99,13 @@ export const useStore = create<AppState>((set) => ({
   setUseAutoColors: (v) => set({ useAutoColors: v }), // Activa/desactiva colores automáticos
   setShowGridMinor: (v) => set({ showGridMinor: v }), // Muestra/oculta el grid fino (5 mm)
   setShowGridMajor: (v) => set({ showGridMajor: v }), // Muestra/oculta el grid grueso (10 mm)
+  setSelectedPrinterId: (id) => {
+    // Validar que existe
+    const exists = !!getPrinterById(id)
+    if (!exists) return
+    set({ selectedPrinterId: id })
+    try {
+      localStorage.setItem('studio:selectedPrinterId', id)
+    } catch { /* ignore localStorage unavailability */ }
+  },
 }))

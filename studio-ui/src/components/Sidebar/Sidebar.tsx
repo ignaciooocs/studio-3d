@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Box, Tabs, Tab, Divider, Typography, Paper } from '@mui/material'
+import { Box, Tabs, Tab, Divider, Typography, Paper, Stack } from '@mui/material'
 import ObjectList from '../ObjectList'
 import ObjectProperties from './ObjectProperties'
 import InsertMenu from './InsertMenu'
 import AlertsPanel from './AlertsPanel'
+import PrinterSelector from './PrinterSelector'
 
 function TabPanel(props: { children?: React.ReactNode; index: number; value: number }) {
   const { children, value, index, ...other } = props
@@ -27,8 +28,13 @@ export default function Sidebar() {
   return (
     <Paper variant="outlined" square sx={{ width: 360, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2 }}>
-        <Typography variant="subtitle1" gutterBottom>Objetos</Typography>
-        <ObjectList />
+        <Stack spacing={2}>
+          <PrinterSelector />
+          <div>
+            <Typography variant="subtitle1" gutterBottom>Objetos</Typography>
+            <ObjectList />
+          </div>
+        </Stack>
       </Box>
       <Divider />
       <Tabs value={tab} onChange={(_, v) => setTab(v)} aria-label="Sidebar Tabs" variant="fullWidth">

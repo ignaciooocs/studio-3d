@@ -150,3 +150,28 @@ Necesito un mini-Tinkercad hecho en React, enfocado en personalización rápida 
 - Operaciones booleanas (union, subtract, intersect).
 - Subida de modelos propios (STL/GLTF).
 - Panel de administración para gestionar pedidos de impresión.
+
+## 🖨️ Selector de impresoras (nuevo)
+
+Se agregó soporte para seleccionar la impresora (y por lo tanto el tamaño de cama y la altura de construcción) desde el panel lateral.
+
+- Componente UI: `src/components/Sidebar/PrinterSelector.tsx`
+- Presets: `src/core/printers/presets.ts` con el tipo `PrinterSpec` en `src/core/printers/types.ts`
+- Estado global: `selectedPrinterId` en `src/store/useStore.ts` (persistido en `localStorage`)
+- Render dinámico:
+	- Cama: `PrintBed.tsx` usa `bed.width` × `bed.depth`
+	- Volumen: `SceneWrapper.tsx` pasa `bed.width`, `bed.depth` y `volume.height` a `BuildVolume`
+
+Para añadir una nueva impresora, edita `src/core/printers/presets.ts` y agrega un objeto al array `PRINTERS`:
+
+```ts
+{
+	id: 'marca-modelo-id',
+	name: 'Marca Modelo',
+	bed: { width: 235, depth: 235, /* shape: 'rect' | 'circle' (opcional) */ },
+	volume: { height: 250 },
+	safetyMargin: 0 // opcional, en mm
+}
+```
+
+La selección se guarda automáticamente y se recuerda entre sesiones.

@@ -5,8 +5,12 @@ import { useThemeContext } from '../../context/ThemeProvider'
 
 // Renderizará la cama de impresión y límites físicos (Fase 1)
 export default function PrintBed() {
-  const size = 220 // mm
-  const half = size / 2
+  const getSelectedPrinter = useStore((s) => s.getSelectedPrinter)
+  const { bed } = getSelectedPrinter()
+  const width = bed.width
+  const depth = bed.depth
+  const halfW = width / 2
+  const halfD = depth / 2
   const useAutoColors = useStore((s) => s.useAutoColors)
   const manualBedColor = useStore((s) => s.bedColor)
   const showGridMinor = useStore((s) => s.showGridMinor)
@@ -23,14 +27,14 @@ export default function PrintBed() {
   const lines: React.ReactElement[] = []
 
   // Líneas paralelas al eje Z (variando X)
-  for (let i = 0; i <= size / minorStep; i++) {
-    const x = -half + i * minorStep
+  for (let i = 0; i <= width / minorStep; i++) {
+    const x = -halfW + i * minorStep
     const isMajor = i % (majorStep / minorStep) === 0
     if ((isMajor && showGridMajor) || (!isMajor && showGridMinor)) {
       lines.push(
         <Line
           key={`x-${i}`}
-          points={[[x, 0.001, -half], [x, 0.001, half]]}
+          points={[[x, 0.001, -halfD], [x, 0.001, halfD]]}
           color={isMajor ? '#6b7280' : '#cbd5e1'}
           lineWidth={isMajor ? 1.6 : 0.8}
         />
@@ -39,14 +43,14 @@ export default function PrintBed() {
   }
 
   // Líneas paralelas al eje X (variando Z)
-  for (let j = 0; j <= size / minorStep; j++) {
-    const z = -half + j * minorStep
+  for (let j = 0; j <= depth / minorStep; j++) {
+    const z = -halfD + j * minorStep
     const isMajor = j % (majorStep / minorStep) === 0
     if ((isMajor && showGridMajor) || (!isMajor && showGridMinor)) {
       lines.push(
         <Line
           key={`z-${j}`}
-          points={[[-half, 0.001, z], [half, 0.001, z]]}
+          points={[[-halfW, 0.001, z], [halfW, 0.001, z]]}
           color={isMajor ? '#6b7280' : '#cbd5e1'}
           lineWidth={isMajor ? 1.6 : 0.8}
         />
@@ -58,7 +62,7 @@ export default function PrintBed() {
     <group>
       {/* Plano de cama */}
       <mesh rotation-x={-Math.PI / 2} receiveShadow position={[0, 0, 0]}>
-        <planeGeometry args={[size, size]} />
+        <planeGeometry args={[width, depth]} />
         <meshStandardMaterial color={bedColor} />
       </mesh>
 
@@ -68,19 +72,19 @@ export default function PrintBed() {
       {/* Borde perimetral marcado */}
       <Line
         points={[
-          [-half, 0.002, -half],
-          [half, 0.002, -half],
-          [half, 0.002, half],
-          [-half, 0.002, half],
-          [-half, 0.002, -half],
+          [-halfW, 0.002, -halfD],
+          [halfW, 0.002, -halfD],
+          [halfW, 0.002, halfD],
+          [-halfW, 0.002, halfD],
+          [-halfW, 0.002, -halfD],
         ]}
         color="#111827"
         lineWidth={1.8}
       />
 
       {/* Ejes X/Z (opcional) para orientación rápida */}
-      <Line points={[[-half, 0.003, 0], [half, 0.003, 0]]} color="#ef4444" lineWidth={1.8} />
-      <Line points={[[0, 0.003, -half], [0, 0.003, half]]} color="#3b82f6" lineWidth={1.8} />
+      <Line points={[[-halfW, 0.003, 0], [halfW, 0.003, 0]]} color="#ef4444" lineWidth={1.8} />
+      <Line points={[[0, 0.003, -halfD], [0, 0.003, halfD]]} color="#3b82f6" lineWidth={1.8} />
     </group>
   )
 }

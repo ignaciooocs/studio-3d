@@ -16,6 +16,8 @@ export default function SceneWrapper() {
   const { scene } = useThree();
   const { setScene } = useEditorContext();
   const showBuildVolume = useStore((s) => s.showBuildVolume);
+  const getSelectedPrinter = useStore((s) => s.getSelectedPrinter);
+  const { bed, volume } = getSelectedPrinter();
 
   // Register the scene with the editor context
   useEffect(() => {
@@ -30,7 +32,9 @@ export default function SceneWrapper() {
 
       {/* Scene elements */}
       <PrintBed />
-      {showBuildVolume && <BuildVolume width={220} depth={220} height={250} />}
+      {showBuildVolume && (
+        <BuildVolume width={bed.width} depth={bed.depth} height={volume.height} />
+      )}
       <SceneObjects />
       <TransformWrapper />
 
