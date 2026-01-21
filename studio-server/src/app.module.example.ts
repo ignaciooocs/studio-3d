@@ -3,10 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MeshyModule } from './meshy/meshy.module';
 import { validationSchema } from './config/validation.schema';
 import { getDatabaseConfig } from './config/database.config';
 import meshyConfig from './config/meshy.config';
+// import { MeshyModule } from './meshy/meshy.module'; // Descomentar cuando se cree
 
 @Module({
   imports: [
@@ -26,8 +26,7 @@ import meshyConfig from './config/meshy.config';
       useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
-    // Módulo Meshy
-    MeshyModule,
+    // MeshyModule, // Descomentar cuando se cree
   ],
   controllers: [AppController],
   providers: [AppService],
