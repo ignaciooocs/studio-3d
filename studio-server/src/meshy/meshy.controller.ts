@@ -9,7 +9,10 @@ import {
   HttpCode,
   HttpStatus,
   BadRequestException,
+  Res,
+  Header,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiTags,
   ApiOperation,
@@ -70,11 +73,11 @@ export class MeshyController {
   @ApiOperation({
     summary: 'Consultar estado de una tarea',
     description:
-      'Obtiene el estado actual de una tarea de generación de modelo 3D. Incluye el progreso, URLs de los modelos generados y cualquier error.',
+      'Obtiene el estado actual de una tarea de generación de modelo 3D desde la base de datos local (actualizada desde Meshy). Incluye el progreso, URLs de los modelos generados y cualquier error.',
   })
   @ApiParam({
     name: 'taskId',
-    description: 'ID único de la tarea (UUID)',
+    description: 'ID único de la tarea (UUID local)',
     example: '123e4567-e89b-12d3-a456-426614174000',
     type: String,
   })
@@ -101,6 +104,124 @@ export class MeshyController {
     @Param('taskId') taskId: string,
   ): Promise<TaskStatusResponseDto> {
     return await this.meshyService.getTaskStatus(taskId);
+  }
+
+  @Get('meshy-task/:taskIdOrMeshyId')
+  @ApiOperation({
+    summary: 'Consultar estado directamente desde Meshy',
+    description:
+      'Obtiene el estado actual de una tarea directamente desde Meshy API, sin pasar por la base de datos local. Acepta tanto el taskId local (UUID) como el meshyTaskId (ID de Meshy). Si se proporciona un taskId local, se busca el meshyTaskId correspondiente en la BD.',
+  })
+  @ApiParam({
+    name: 'taskIdOrMeshyId',
+    description: 'ID de la tarea local (UUID) o ID de Meshy. Si es un UUID local, se buscará el meshyTaskId correspondiente.',
+    example: '4c86f125-433b-48b4-8b46-1c06e7142f75 o 019bf165-20f1-7ab9-b13c-7bb82785f7f4',
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado de la tarea obtenido directamente desde Meshy',
+    type: TaskStatusResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Tarea no encontrada en la BD local o en Meshy',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: {
+          type: 'string',
+          example: 'Task not found',
+        },
+        error: { type: 'string', example: 'Not Found' },
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Error al consultar Meshy API',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 400 },
+        message: {
+          type: 'string',
+          example: 'Error al consultar Meshy API',
+        },
+        error: { type: 'string', example: 'Bad Request' },
+      },
+    },
+  })
+  async getTaskStatusFromMeshy(
+    @Param('taskIdOrMeshyId') taskIdOrMeshyId: string,
+  ): Promise<TaskStatusResponseDto> {
+    return await this.meshyService.getTaskStatusFromMeshy(taskIdOrMeshyId);
+  }
+
+  @Get('task/:taskId/proxy')
+  @ApiOperation({
+    summary: 'Descargar modelo a través del servidor (proxy)',
+    description:
+      'Descarga el modelo desde Meshy a través del servidor para evitar problemas de CORS. Devuelve el archivo directamente.',
+  })
+  @ApiParam({
+    name: 'taskId',
+    description: 'ID único de la tarea (UUID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'format',
+    description: 'Formato del modelo a descargar',
+    enum: ModelFormat,
+    required: false,
+    example: ModelFormat.GLB,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Archivo del modelo descargado exitosamente',
+    content: {
+      'application/octet-stream': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Tarea no encontrada o formato no disponible',
+  })
+  @ApiBadRequestResponse({
+    description: 'Tarea no completada o formato inválido',
+  })
+  async proxyModel(
+    @Param('taskId') taskId: string,
+    @Res() res: Response,
+    @Query('format') format?: string,
+  ): Promise<void> {
+    const modelFormat =
+      (format as ModelFormat) || ModelFormat.GLB;
+
+    // Validar formato
+    if (!Object.values(ModelFormat).includes(modelFormat)) {
+      throw new BadRequestException(
+        `Invalid format. Allowed formats: ${Object.values(ModelFormat).join(', ')}`,
+      );
+    }
+
+    const { buffer, contentType, filename } =
+      await this.meshyService.downloadModelAsBuffer(taskId, modelFormat);
+
+    // Configurar headers para la descarga
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length.toString());
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Enviar el buffer
+    res.send(buffer);
   }
 
   @Get('task/:taskId/download')
@@ -175,6 +296,21 @@ export class MeshyController {
     );
 
     return { downloadUrl };
+  }
+
+  @Get('tasks')
+  @ApiOperation({
+    summary: 'Listar todas las tareas',
+    description:
+      'Obtiene una lista de todas las tareas de generación de modelos 3D creadas.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de tareas obtenida exitosamente',
+    type: [TaskStatusResponseDto],
+  })
+  async getAllTasks(): Promise<TaskStatusResponseDto[]> {
+    return await this.meshyService.getAllTasks();
   }
 
   @Delete('task/:taskId')

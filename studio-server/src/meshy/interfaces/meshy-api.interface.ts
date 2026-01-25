@@ -16,16 +16,18 @@ export interface MeshyTaskResponse {
 }
 
 export interface MeshyTaskStatus {
-  result: {
-    id: string;
-    status: TaskStatus;
-    progress?: number;
-    model_urls?: {
-      glb?: string;
-      fbx?: string;
-      obj?: string;
-      usdz?: string;
-    };
-    error?: string;
+  id: string;
+  type: string;
+  status: TaskStatus;
+  progress?: number;
+  model_urls?: {
+    glb?: string;
+    fbx?: string;
+    obj?: string;
+    usdz?: string;
   };
+  task_error?: string | null;
+  created_at?: number;
+  started_at?: number;
+  finished_at?: number;
 }

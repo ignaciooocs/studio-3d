@@ -52,6 +52,13 @@ export class TaskStatusResponseDto {
   })
   error?: string;
 
+  @ApiPropertyOptional({
+    description: 'Nombre personalizado de la tarea/modelo',
+    example: 'Mi Modelo 3D',
+    type: String,
+  })
+  name?: string;
+
   @ApiProperty({
     description: 'Fecha de creación de la tarea',
     example: '2024-01-01T00:00:00.000Z',
@@ -90,6 +97,13 @@ export class CreateTaskResponseDto {
     example: TaskStatus.PENDING,
   })
   status: TaskStatus;
+
+  @ApiPropertyOptional({
+    description: 'Nombre personalizado de la tarea/modelo',
+    example: 'Mi Modelo 3D',
+    type: String,
+  })
+  name?: string;
 
   @ApiProperty({
     description: 'Fecha de creación de la tarea',

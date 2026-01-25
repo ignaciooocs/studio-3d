@@ -5,6 +5,7 @@ import ObjectProperties from './ObjectProperties'
 import InsertMenu from './InsertMenu'
 import AlertsPanel from './AlertsPanel'
 import PrinterSelector from './PrinterSelector'
+import MeshyPanel from './MeshyPanel'
 
 function TabPanel(props: { children?: React.ReactNode; index: number; value: number }) {
   const { children, value, index, ...other } = props
@@ -40,7 +41,8 @@ export default function Sidebar() {
       <Tabs value={tab} onChange={(_, v) => setTab(v)} aria-label="Sidebar Tabs" variant="fullWidth">
         <Tab label="Propiedades" id="sidebar-tab-0" aria-controls="sidebar-tabpanel-0" />
         <Tab label="Insertar" id="sidebar-tab-1" aria-controls="sidebar-tabpanel-1" />
-        <Tab label="Alertas" id="sidebar-tab-2" aria-controls="sidebar-tabpanel-2" />
+        <Tab label="Meshy" id="sidebar-tab-2" aria-controls="sidebar-tabpanel-2" />
+        <Tab label="Alertas" id="sidebar-tab-3" aria-controls="sidebar-tabpanel-3" />
       </Tabs>
       <Box sx={{ flex: 1, overflowY: 'auto' }}>
         <TabPanel value={tab} index={0}>
@@ -50,6 +52,9 @@ export default function Sidebar() {
           <InsertMenu />
         </TabPanel>
         <TabPanel value={tab} index={2}>
+          <MeshyPanel />
+        </TabPanel>
+        <TabPanel value={tab} index={3}>
           <AlertsPanel />
         </TabPanel>
       </Box>

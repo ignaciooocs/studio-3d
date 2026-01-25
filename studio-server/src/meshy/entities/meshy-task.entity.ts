@@ -42,6 +42,9 @@ export class MeshyTask {
   @Column({ type: 'int', nullable: true })
   targetPolycount: number | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  name: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

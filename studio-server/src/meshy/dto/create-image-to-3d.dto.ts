@@ -93,4 +93,13 @@ export class CreateImageTo3DDto {
   @IsOptional()
   @IsBoolean()
   moderation?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Nombre personalizado para la tarea/modelo',
+    example: 'Mi Modelo 3D',
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  name?: string;
 }

@@ -1,18 +1,47 @@
 import { useGLTF } from '@react-three/drei'
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, useRef } from 'react'
 import { Box3, Vector3 } from 'three'
 import { useStore } from '../../store/useStore'
 
 export default function CustomGLTF(props: { src: string; objectId?: string }) {
   const gltf = useGLTF(props.src) as any
   const updateObject = useStore((s) => s.updateObject)
+  const clonedSceneRef = useRef<any>(null)
+  
+  // Clonar la escena para cada instancia para evitar problemas cuando se elimina y se vuelve a agregar
+  const clonedScene = useMemo(() => {
+    if (!gltf.scene) return null
+    
+    // Si ya tenemos una escena clonada, limpiarla primero
+    if (clonedSceneRef.current) {
+      clonedSceneRef.current.traverse((child: any) => {
+        if (child.geometry) child.geometry.dispose()
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach((mat: any) => {
+              if (mat.map) mat.map.dispose()
+              mat.dispose()
+            })
+          } else {
+            if (child.material.map) child.material.map.dispose()
+            child.material.dispose()
+          }
+        }
+      })
+    }
+    
+    // Clonar la escena
+    const cloned = gltf.scene.clone(true)
+    clonedSceneRef.current = cloned
+    return cloned
+  }, [gltf.scene, props.objectId]) // Incluir objectId para forzar reclonación cuando cambia
   
   // Detección inteligente basada en rangos de tamaño realistas
   const scale = useMemo(() => {
-    if (!gltf.scene) return [100, 100, 100]
+    if (!clonedScene) return [100, 100, 100]
     
-    // Calcular el tamaño del modelo
-    const box = new Box3().setFromObject(gltf.scene)
+    // Calcular el tamaño del modelo usando la escena clonada
+    const box = new Box3().setFromObject(clonedScene)
     const size = box.getSize(new Vector3())
     const maxDimension = Math.max(size.x, size.y, size.z)
     
@@ -47,14 +76,14 @@ export default function CustomGLTF(props: { src: string; objectId?: string }) {
       // Ejemplo: modelo 5000mm → 5000mm (necesita reducción)
       return [0.1, 0.1, 0.1] // reducir 10x
     }
-  }, [gltf.scene])
+  }, [clonedScene])
   
   // Calcular dimensiones reales del modelo
   const dimensions = useMemo(() => {
-    if (!gltf.scene || !props.objectId) return null
+    if (!clonedScene || !props.objectId) return null
     
-    // Calcular bounding box del modelo original (sin escala)
-    const box = new Box3().setFromObject(gltf.scene)
+    // Calcular bounding box del modelo clonado (sin escala)
+    const box = new Box3().setFromObject(clonedScene)
     const size = box.getSize(new Vector3())
     
     // Aplicar la escala calculada para obtener dimensiones finales
@@ -63,7 +92,7 @@ export default function CustomGLTF(props: { src: string; objectId?: string }) {
       height: (size.y * scale[1]).toFixed(1),
       depth: (size.z * scale[2]).toFixed(1)
     }
-  }, [gltf.scene, scale, props.objectId])
+  }, [clonedScene, scale, props.objectId])
   
   // Actualizar las dimensiones en el store cuando cambien
   useEffect(() => {
@@ -78,9 +107,34 @@ export default function CustomGLTF(props: { src: string; objectId?: string }) {
     }
   }, [dimensions, props.objectId, updateObject])
   
+  // Limpiar recursos cuando el componente se desmonte
+  useEffect(() => {
+    return () => {
+      if (clonedSceneRef.current) {
+        clonedSceneRef.current.traverse((child: any) => {
+          if (child.geometry) child.geometry.dispose()
+          if (child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach((mat: any) => {
+                if (mat.map) mat.map.dispose()
+                mat.dispose()
+              })
+            } else {
+              if (child.material.map) child.material.map.dispose()
+              child.material.dispose()
+            }
+          }
+        })
+        clonedSceneRef.current = null
+      }
+    }
+  }, [])
+  
+  if (!clonedScene) return null
+  
   return (
     <primitive 
-      object={gltf.scene} 
+      object={clonedScene} 
       scale={scale}
     />
   )

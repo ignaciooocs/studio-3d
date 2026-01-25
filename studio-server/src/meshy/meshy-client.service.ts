@@ -24,11 +24,26 @@ export class MeshyClientService {
     request: MeshyImageTo3DRequest,
   ): Promise<MeshyTaskResponse> {
     try {
-      this.logger.log(`Creating image-to-3d task: ${JSON.stringify(request)}`);
+      // Limpiar el request para no enviar campos undefined
+      const cleanRequest = Object.fromEntries(
+        Object.entries(request).filter(([_, value]) => value !== undefined)
+      ) as MeshyImageTo3DRequest;
+      
+      // Log request sin el base64 completo para no saturar los logs
+      const logRequest = {
+        ...cleanRequest,
+        image_base64: cleanRequest.image_base64 ? `${cleanRequest.image_base64.substring(0, 50)}... (${cleanRequest.image_base64.length} chars)` : null,
+      };
+      this.logger.log(`Creating image-to-3d task: ${JSON.stringify(logRequest)}`);
+      this.logger.log(`Meshy API URL: ${this.config.baseUrl}/openapi/v1/image-to-3d`);
+      this.logger.log(`API Key present: ${!!this.config.apiKey}`);
+      this.logger.log(`Request keys: ${Object.keys(cleanRequest).join(', ')}`);
+      this.logger.log(`Full request (without base64): ${JSON.stringify(cleanRequest, (key, value) => key === 'image_base64' ? `[BASE64: ${value?.length || 0} chars]` : value)}`);
+      
       const response = await firstValueFrom(
         this.httpService.post<MeshyTaskResponse>(
           `${this.config.baseUrl}/openapi/v1/image-to-3d`,
-          request,
+          cleanRequest,
           {
             headers: {
               Authorization: `Bearer ${this.config.apiKey}`,
@@ -41,7 +56,15 @@ export class MeshyClientService {
       this.logger.log(`Image-to-3d task created: ${JSON.stringify(response.data)}`);
       return response.data;
     } catch (error: any) {
-      this.logger.error(`Error creating image-to-3d task: ${error}`);
+      this.logger.error(`Error creating image-to-3d task: ${error.message || error}`);
+      if (error.response) {
+        this.logger.error(`Meshy API error response: ${JSON.stringify(error.response.data)}`);
+        this.logger.error(`Status: ${error.response.status}`);
+      }
+      if (error.request) {
+        this.logger.error(`No response received from Meshy API`);
+      }
+      this.logger.error(`Error stack: ${error.stack}`);
       this.handleError(error, 'Error creating image-to-3d task');
       throw error;
     }

@@ -46,7 +46,7 @@ export const validationSchema = Joi.object({
   // Meshy Task Configuration
   // ============================================
   MESHY_POLLING_INTERVAL: Joi.number().positive().default(5000),
-  MESHY_MAX_RETRIES: Joi.number().integer().min(0).max(10).default(3),
+  MESHY_MAX_RETRIES: Joi.number().integer().min(0).default(3),
 
   // ============================================
   // Server Configuration
@@ -55,4 +55,5 @@ export const validationSchema = Joi.object({
   NODE_ENV: Joi.string()
     .valid('development', 'production', 'test')
     .default('development'),
+  CORS_ORIGINS: Joi.string().default('http://localhost:5173,http://localhost:3000,http://localhost:5174'),
 });
