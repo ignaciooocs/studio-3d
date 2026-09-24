@@ -1,6 +1,31 @@
 ## 📝 Contexto del Proyecto
 
-Quiero desarrollar una aplicación web en React donde los usuarios puedan personalizar modelos 3D para luego exportarlos directamente en formato STL, listos para impresión 3D.
+Quiero desarrollar una aplicación web en React donde los usuarios puedan persona### Fase 6 — Persistencia mínima (Semana 6)
+
+🔹 Objetivo: guardar y recuperar proyectos.
+
+- Backend Express simple con endpoint /upload-stl.
+- Enviar STL al servidor (FormData).
+- Guardar archivo en uploads/ y registrar metadatos (JSON).
+- Pantalla de usuario → "Mis modelos" con lista de descargas.
+
+✅ Entregable: usuario guarda su modelo, lo ve en su lista y lo descarga cuando quiera.
+
+### Fase 7 — Sistema Undo/Redo (Semana 7)
+
+🔹 Objetivo: implementar un sistema robusto de deshacer/rehacer acciones.
+
+- Command Pattern para encapsular todas las operaciones del editor.
+- Historial de comandos con navegación hacia adelante y atrás.
+- Shortcuts de teclado (Ctrl+Z, Ctrl+Y / Ctrl+Shift+Z).
+- Indicadores visuales en la UI (botones habilitados/deshabilitados).
+- Límite de historial configurable para optimizar memoria.
+- Merge inteligente de comandos similares consecutivos.
+- Integración completa con todas las operaciones del editor.
+
+✅ Entregable: usuario puede deshacer/rehacer cualquier acción (agregar, mover, cambiar color, etc.) con teclado o botones.
+
+### 🔮 Futuro post-MVP (cuando el MVP ya funcione) 3D para luego exportarlos directamente en formato STL, listos para impresión 3D.
 
 ## 🎯 Objetivo Principal
 
@@ -77,17 +102,7 @@ Necesito un mini-Tinkercad hecho en React, enfocado en personalización rápida 
 
 ✅ Entregable: colocar un cubo o esfera, moverlo y escalarlo dentro de la cama.
 
-### Fase 3 — Validación de límites (Semana 3)
-
-🔹 Objetivo: que el editor entienda los límites físicos.
-
-- Calcular Box3 de cada objeto.
-- Mostrar medidas actuales en mm en un panel lateral.
-- Detectar si el objeto excede los límites de impresión → mostrar alerta visual (cambiar color, tooltip, mensaje).
-
-✅ Entregable: si un cubo se sale de la cama, aparece alerta roja.
-
-### Fase 4 — Personalización (Semana 4)
+### Fase 3 — Personalización (Semana 4)
 
 🔹 Objetivo: permitir modificaciones útiles y divertidas.
 
@@ -96,6 +111,16 @@ Necesito un mini-Tinkercad hecho en React, enfocado en personalización rápida 
 - Panel lateral con controles: posición, escala, rotación (inputs numéricos).
 
 ✅ Entregable: escribir tu nombre y verlo en la cama, coloreado.
+
+### Fase 4 — Validación de límites (Semana 3)
+
+🔹 Objetivo: que el editor entienda los límites físicos.
+
+- Calcular Box3 de cada objeto.
+- Mostrar medidas actuales en mm en un panel lateral.
+- Detectar si el objeto excede los límites de impresión → mostrar alerta visual (cambiar color, tooltip, mensaje).
+
+✅ Entregable: si un cubo se sale de la cama, aparece alerta roja.
 
 ### Fase 5 — Exportación (Semana 5)
 
@@ -125,3 +150,28 @@ Necesito un mini-Tinkercad hecho en React, enfocado en personalización rápida 
 - Operaciones booleanas (union, subtract, intersect).
 - Subida de modelos propios (STL/GLTF).
 - Panel de administración para gestionar pedidos de impresión.
+
+## 🖨️ Selector de impresoras (nuevo)
+
+Se agregó soporte para seleccionar la impresora (y por lo tanto el tamaño de cama y la altura de construcción) desde el panel lateral.
+
+- Componente UI: `src/components/Sidebar/PrinterSelector.tsx`
+- Presets: `src/core/printers/presets.ts` con el tipo `PrinterSpec` en `src/core/printers/types.ts`
+- Estado global: `selectedPrinterId` en `src/store/useStore.ts` (persistido en `localStorage`)
+- Render dinámico:
+	- Cama: `PrintBed.tsx` usa `bed.width` × `bed.depth`
+	- Volumen: `SceneWrapper.tsx` pasa `bed.width`, `bed.depth` y `volume.height` a `BuildVolume`
+
+Para añadir una nueva impresora, edita `src/core/printers/presets.ts` y agrega un objeto al array `PRINTERS`:
+
+```ts
+{
+	id: 'marca-modelo-id',
+	name: 'Marca Modelo',
+	bed: { width: 235, depth: 235, /* shape: 'rect' | 'circle' (opcional) */ },
+	volume: { height: 250 },
+	safetyMargin: 0 // opcional, en mm
+}
+```
+
+La selección se guarda automáticamente y se recuerda entre sesiones.

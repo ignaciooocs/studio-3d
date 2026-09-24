@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Box, Tabs, Tab, Divider, Typography, Paper } from '@mui/material'
+import { Box, Tabs, Tab, Divider, Typography, Paper, Stack } from '@mui/material'
 import ObjectList from '../ObjectList'
 import ObjectProperties from './ObjectProperties'
 import InsertMenu from './InsertMenu'
 import AlertsPanel from './AlertsPanel'
+import PrinterSelector from './PrinterSelector'
+import MeshyPanel from './MeshyPanel'
 
 function TabPanel(props: { children?: React.ReactNode; index: number; value: number }) {
   const { children, value, index, ...other } = props
@@ -27,14 +29,20 @@ export default function Sidebar() {
   return (
     <Paper variant="outlined" square sx={{ width: 360, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ p: 2 }}>
-        <Typography variant="subtitle1" gutterBottom>Objetos</Typography>
-        <ObjectList />
+        <Stack spacing={2}>
+          <PrinterSelector />
+          <div>
+            <Typography variant="subtitle1" gutterBottom>Objetos</Typography>
+            <ObjectList />
+          </div>
+        </Stack>
       </Box>
       <Divider />
       <Tabs value={tab} onChange={(_, v) => setTab(v)} aria-label="Sidebar Tabs" variant="fullWidth">
         <Tab label="Propiedades" id="sidebar-tab-0" aria-controls="sidebar-tabpanel-0" />
         <Tab label="Insertar" id="sidebar-tab-1" aria-controls="sidebar-tabpanel-1" />
-        <Tab label="Alertas" id="sidebar-tab-2" aria-controls="sidebar-tabpanel-2" />
+        <Tab label="Meshy" id="sidebar-tab-2" aria-controls="sidebar-tabpanel-2" />
+        <Tab label="Alertas" id="sidebar-tab-3" aria-controls="sidebar-tabpanel-3" />
       </Tabs>
       <Box sx={{ flex: 1, overflowY: 'auto' }}>
         <TabPanel value={tab} index={0}>
@@ -44,6 +52,9 @@ export default function Sidebar() {
           <InsertMenu />
         </TabPanel>
         <TabPanel value={tab} index={2}>
+          <MeshyPanel />
+        </TabPanel>
+        <TabPanel value={tab} index={3}>
           <AlertsPanel />
         </TabPanel>
       </Box>
